@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:geocoding/geocoding.dart' as gc;
 
 void main() {
   runApp(const MyApp());
@@ -33,7 +34,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> { 
- // マーカー用のList
+  // マーカー用のList
   final List<Marker> _markers = [];
   // Listに追加する関数
   void _addMarker(LatLng latlng) { // LatLngを受け取る
@@ -59,6 +60,23 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  Future<void> _printPlacemark(LatLng latlng) async { // 1
+    final lat = latlng.latitude; // 2
+    final lng = latlng.longitude;
+    final placeMarks =  await gc.placemarkFromCoordinates(lat, lng); // 3
+    final placeMark = placeMarks[0];
+
+    print("国：${placeMark.country}"); // 4
+    print("郵便番号：${ placeMark.postalCode}");
+    print("都道府県：${placeMark.administrativeArea}");
+    print("市町区村：${placeMark.locality}");
+
+    print("ISO国コード：${placeMark.isoCountryCode}"); // 5
+    print("郵便番号：${ placeMark.postalCode}"); // 6
+    print("道？：${placeMark.street}"); // 7
+    print("一括で出力：${ placeMark.toString()}"); // 8
+  }
+
   @override
   Widget build(BuildContext context) {
     final fm =  FlutterMap(
@@ -68,8 +86,9 @@ class _MyHomePageState extends State<MyHomePage> {
         initialZoom: 16,
         minZoom: 5,
         maxZoom: 20,
-        onTap: (tapPosition, latLng) {
+        onTap: (tapPosition, latLng) async {
           _addMarker(latLng); // タップした位置にマーカーを追加
+          await _printPlacemark(latLng); // タップした位置の情報を表示
         }
       ),
       children: [
