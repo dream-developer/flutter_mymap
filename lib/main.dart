@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:geocoding/geocoding.dart' as gc;
-
+import 'package:geolocator/geolocator.dart';
 void main() {
   runApp(const MyApp());
 }
@@ -34,92 +30,59 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> { 
-  // マーカー用のList
-  final List<Marker> _markers = [];
-  // Listに追加する関数
-  void _addMarker(LatLng latlng) { // LatLngを受け取る
-    final marker = Marker(
-      width: 20.0,
-      height: 20.0,
-      point: latlng, // LatLngをセット
-      child: GestureDetector(
-        onTap: () { // LatLngより緯度/経度 を取得し出力
-          print("${latlng.latitude}：${latlng.longitude}");
-        },
-        child: const Icon(
-          Icons.location_on,
-          color: Colors.red,
-          size: 30,
-        ),
-      ),
-      rotate: true, // マーカーまで回転しないようにする場合  
-    );
+  double _lat = 0.0;
+  double _lng = 0.0;
 
-    setState(() { // Listに追加するタイミングで再描画
-      _markers.add(marker);
-    });
-  }
+  Future<void> _setLocation() async {  // 1
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled(); // 2
+    if (!serviceEnabled) {
+      print('位置情報サービスが有効になっていません(ダイアログ表示など)');
+      return;
+    }
 
-  Future<void> _printPlacemark(LatLng latlng) async { // 1
-    final lat = latlng.latitude; // 2
-    final lng = latlng.longitude;
-    final placeMarks =  await gc.placemarkFromCoordinates(lat, lng); // 3
-    final placeMark = placeMarks[0];
-
-    print("国：${placeMark.country}"); // 4
-    print("郵便番号：${ placeMark.postalCode}");
-    print("都道府県：${placeMark.administrativeArea}");
-    print("市町区村：${placeMark.locality}");
-
-    print("ISO国コード：${placeMark.isoCountryCode}"); // 5
-    print("郵便番号：${ placeMark.postalCode}"); // 6
-    print("道？：${placeMark.street}"); // 7
-    print("一括で出力：${ placeMark.toString()}"); // 8
-  }
+    LocationPermission permission = await Geolocator.requestPermission(); // 3
+    permission = await Geolocator.checkPermission();// 4
+    if (permission == LocationPermission.denied) { // 5
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        print('位置情報の許可が拒否されました(ダイアログ表示など)');
+        return;
+      }
+      if (permission == LocationPermission.deniedForever) {
+        print('位置情報の許可が恒久的に拒否されるよう設定されてます(ダイアログ表示など)');
+        return;
+      }
+    }
+  
+    Position position = await Geolocator.getCurrentPosition();// 6
+    _lat = position.latitude; // 7
+    _lng = position.longitude;
+    print('現在地の緯度：$_lat');
+    print('現在地の経度：$_lng');
+ }
 
   @override
   Widget build(BuildContext context) {
-    final fm =  FlutterMap(
-      options: MapOptions( // onTap使用時では、const は外す
-        // 中心座標(経度/緯度は国会議事堂)
-        initialCenter: LatLng(35.67604049, 139.74527642),
-        initialZoom: 16,
-        minZoom: 5,
-        maxZoom: 20,
-        onTap: (tapPosition, latLng) async {
-          _addMarker(latLng); // タップした位置にマーカーを追加
-          await _printPlacemark(latLng); // タップした位置の情報を表示
-        }
-      ),
-      children: [
-        TileLayer( // タイル
-          urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-          userAgentPackageName: 'com.example.app', // アプリのパッケージ名を書く
-        ),
-        MarkerLayer(
-          markers: _markers, // 先ほどのマーカー用のListを渡す
-        ),
-        RichAttributionWidget(
-          attributions: [
-            // OpenStreetMapのクレジット表記
-            TextSourceAttribution(
-              'OpenStreetMap contributors',
-              onTap: () => launchUrl(Uri.parse('https://openstreetmap.org/copyright')),
-            ),
-            // その他、必要に応じて表記やリンク等を追加していく事。
-          ],
-        ),
-      ],
-    );
 
-    final body = fm;  
+    const body = Text("ボタン押下で現在地をコンソールにデバッグ出力");  
+
+    final fab = Row( // 地図表示の場合、クレジット表記部分が隠れないよう真ん中に配置
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        FloatingActionButton(
+          tooltip: '現在地の取得',
+          child: const Icon(Icons.location_on),
+          onPressed: () async {
+            await _setLocation();
+          },
+        ),        
+      ]
+    );
 
     final sc = Scaffold(
-      body: body, // ボディー        
+      body: body, // ボディー  
+      floatingActionButton: fab,        
     );
-
-    return SafeArea(
-      child: sc,
-    );
+    return SafeArea( child: sc, );
   }
 }
