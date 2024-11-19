@@ -33,9 +33,35 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> { 
+ // マーカー用のList
+  final List<Marker> _markers = [];
+  // Listに追加する関数
+  void _addMarker(LatLng latlng) { // LatLngを受け取る
+    final marker = Marker(
+      width: 20.0,
+      height: 20.0,
+      point: latlng, // LatLngをセット
+      child: GestureDetector(
+        onTap: () { // LatLngより緯度/経度 を取得し出力
+          print("${latlng.latitude}：${latlng.longitude}");
+        },
+        child: const Icon(
+          Icons.location_on,
+          color: Colors.red,
+          size: 30,
+        ),
+      ),
+      rotate: true, // マーカーまで回転しないようにする場合  
+    );
+
+    setState(() { // Listに追加するタイミングで再描画
+      _markers.add(marker);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final fm =  FlutterMap( // 1
+    final fm =  FlutterMap(
       options: MapOptions( // onTap使用時では、const は外す
         // 中心座標(経度/緯度は国会議事堂)
         initialCenter: LatLng(35.67604049, 139.74527642),
@@ -43,41 +69,21 @@ class _MyHomePageState extends State<MyHomePage> {
         minZoom: 5,
         maxZoom: 20,
         onTap: (tapPosition, latLng) {
-          print(latLng); // LatLng型
-          print(latLng.latitude); // 緯度
-          print(latLng.longitude); // 経度
+          _addMarker(latLng); // タップした位置にマーカーを追加
         }
       ),
       children: [
-        TileLayer( // 5
-          urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', // 6
-          userAgentPackageName: 'com.example.app', // 7
+        TileLayer( // タイル
+          urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+          userAgentPackageName: 'com.example.app', // アプリのパッケージ名を書く
         ),
         MarkerLayer(
-          markers: [         
-            Marker(
-              width: 20.0,
-              height: 20.0,
-              point: LatLng(35.67604049, 139.74527642), // ピンの位置
-              child: GestureDetector(
-                onTap: () {
-                  print("マーカーのタップ時の処理");
-                },
-                child: const Icon(
-                  Icons.location_on,
-                  color: Colors.red,
-                  size: 30,
-                ),
-              ),
-              rotate: true, // マーカーまで回転しないようにする場合  
-          ),
-          ],
+          markers: _markers, // 先ほどのマーカー用のListを渡す
         ),
-                                                                                                                                
-        RichAttributionWidget( // 8
+        RichAttributionWidget(
           attributions: [
             // OpenStreetMapのクレジット表記
-            TextSourceAttribution( // 9
+            TextSourceAttribution(
               'OpenStreetMap contributors',
               onTap: () => launchUrl(Uri.parse('https://openstreetmap.org/copyright')),
             ),
@@ -86,7 +92,9 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ],
     );
+
     final body = fm;  
+
     final sc = Scaffold(
       body: body, // ボディー        
     );
