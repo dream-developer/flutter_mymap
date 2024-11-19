@@ -17,16 +17,19 @@ void main() {
         urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', // 6
         userAgentPackageName: 'com.example.app', // 7
       ),
-      RichAttributionWidget( // 8
-        attributions: [
-          // OpenStreetMapのクレジット表記
-          TextSourceAttribution( // 9
-            'OpenStreetMap contributors',
-            onTap: () => launchUrl(Uri.parse('https://openstreetmap.org/copyright')),
-          ),
-          // その他、必要に応じて表記やリンク等を追加していく事。
-        ],
+      const SimpleAttributionWidget(
+        source: Text('OpenStreetMap contributors'),
       ),
+      // RichAttributionWidget(
+      //   attributions: [
+      //     // OpenStreetMapのクレジット表記
+      //     TextSourceAttribution(
+      //       'OpenStreetMap contributors',
+      //       onTap: () => launchUrl(Uri.parse('https://openstreetmap.org/copyright')),
+      //     ),
+      //     // その他、必要に応じて表記やリンク等を追加していく事。
+      //   ],
+      // ),
     ],
   );
   final body = fm;  
