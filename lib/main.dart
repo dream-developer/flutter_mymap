@@ -17,19 +17,20 @@ void main() {
         urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', // 6
         userAgentPackageName: 'com.example.app', // 7
       ),
-      PolylineLayer(
-        polylines: [
-          Polyline(
+      PolygonLayer(
+        polygons: [ 
+          Polygon(
             points: [
-              LatLng(35.678641, 139.745057),
-              LatLng(35.676109, 139.749721),
-              LatLng(35.674842, 139.739192),
+              const LatLng(35.678641, 139.745057),
+              const LatLng(35.676109, 139.749721),
+              const LatLng(35.674842, 139.739192),
             ],
-            strokeWidth: 2.0,
-            color: Colors.red,
+            color: Colors.blue.withOpacity(0.2),
+            borderColor: Colors.blue,
+            borderStrokeWidth: 2.0, // 枠線の太さ
           ),
         ],
-      ),                                                                                             
+      ),                                                                                       
       RichAttributionWidget( // 8
         attributions: [
           // OpenStreetMapのクレジット表記
