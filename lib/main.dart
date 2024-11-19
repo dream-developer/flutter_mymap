@@ -17,19 +17,19 @@ void main() {
         urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', // 6
         userAgentPackageName: 'com.example.app', // 7
       ),
-      CircleLayer(
-        circles: [  
-          CircleMarker(
-            point: const LatLng(35.67604049, 139.74527642),
-            // 「メートル単位」を有効
-            useRadiusInMeter: true,
-            radius: 250, // 半径0.25km(250m)
-            color: Colors.blue.withOpacity(0.1),
-            borderColor: Colors.blue,
-            borderStrokeWidth: 1.0, // 枠線の太さ
+      PolylineLayer(
+        polylines: [
+          Polyline(
+            points: [
+              LatLng(35.678641, 139.745057),
+              LatLng(35.676109, 139.749721),
+              LatLng(35.674842, 139.739192),
+            ],
+            strokeWidth: 2.0,
+            color: Colors.red,
           ),
-        ], 
-      ),
+        ],
+      ),                                                                                             
       RichAttributionWidget( // 8
         attributions: [
           // OpenStreetMapのクレジット表記
