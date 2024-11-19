@@ -17,20 +17,26 @@ void main() {
         urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', // 6
         userAgentPackageName: 'com.example.app', // 7
       ),
-      PolygonLayer(
-        polygons: [ 
-          Polygon(
-            points: [
-              const LatLng(35.678641, 139.745057),
-              const LatLng(35.676109, 139.749721),
-              const LatLng(35.674842, 139.739192),
-            ],
-            color: Colors.blue.withOpacity(0.2),
-            borderColor: Colors.blue,
-            borderStrokeWidth: 2.0, // 枠線の太さ
-          ),
+      MarkerLayer(
+        markers: [         
+          Marker(
+            width: 20.0,
+            height: 20.0,
+            point: LatLng(35.67604049, 139.74527642), // ピンの位置
+            child: GestureDetector(
+              onTap: () {
+                print("マーカーのタップ時の処理");
+              },
+              child: const Icon(
+                Icons.location_on,
+                color: Colors.red,
+                size: 30,
+              ),
+            ),
+            rotate: true, // マーカーまで回転しないようにする場合  
+         ),
         ],
-      ),                                                                                       
+      ),
       RichAttributionWidget( // 8
         attributions: [
           // OpenStreetMapのクレジット表記
