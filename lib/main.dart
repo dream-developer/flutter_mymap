@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:geocoding/geocoding.dart' as gc;
+
 import 'package:geolocator/geolocator.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -32,6 +38,10 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> { 
   double _lat = 0.0;
   double _lng = 0.0;
+  // マップ用コントローラー
+  final _mp = MapController();
+  // マーカー用のList
+  List<Marker> _markers = [];
 
   Future<void> _setLocation() async {  // 1
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled(); // 2
@@ -63,17 +73,62 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final fm =  FlutterMap(
+      mapController: _mp,  // マップ用コントローラー
+      options: const MapOptions( 
+        initialCenter: LatLng(35.67604049, 139.74527642),
+        initialZoom: 16,
+        minZoom: 5,
+        maxZoom: 20,
+      ),
+      children: [
+        TileLayer( // タイル
+          urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+          userAgentPackageName: 'com.example.app', // アプリのパッケージ名を書く
+        ),
+        MarkerLayer(
+          markers: _markers, // 先ほどのマーカー用のListを渡す
+        ),
+        RichAttributionWidget(
+          attributions: [
+            // OpenStreetMapのクレジット表記
+            TextSourceAttribution(
+              'OpenStreetMap contributors',
+              onTap: () => launchUrl(Uri.parse('https://openstreetmap.org/copyright')),
+            ),
+            // その他、必要に応じて表記やリンク等を追加していく事。
+          ],
+        ),
+      ],
+    );
 
-    const body = Text("ボタン押下で現在地をコンソールにデバッグ出力");  
+    final body = fm;  
 
-    final fab = Row( // 地図表示の場合、クレジット表記部分が隠れないよう真ん中に配置
+    final fab = Row( 
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         FloatingActionButton(
           tooltip: '現在地の取得',
           child: const Icon(Icons.location_on),
-          onPressed: () async {
-            await _setLocation();
+          onPressed: () async { // awaitするので asyncを付ける
+            await _setLocation(); // 【１】ここでawaitしないと_mp.moveが先に行われてしまう。
+
+            final marker = Marker( // 【２】マーカーの作成
+              width: 20.0,
+              height: 20.0,
+              point: LatLng(_lat, _lng), 
+              child: const Icon(
+                Icons.location_on,
+                color: Colors.red,
+                size: 30,
+              ),
+            );
+            _mp.move( // 【３】マップコントローラーで移動
+              LatLng(_lat, _lng),
+              16.0 // ズーム値も必須
+            );             
+            _markers.clear(); // 【４】一旦クリア
+            _markers.add(marker); // 【５】マーカー用リストに追加
           },
         ),        
       ]
@@ -83,6 +138,9 @@ class _MyHomePageState extends State<MyHomePage> {
       body: body, // ボディー  
       floatingActionButton: fab,        
     );
-    return SafeArea( child: sc, );
+
+    return SafeArea(
+      child: sc,
+    );
   }
 }
