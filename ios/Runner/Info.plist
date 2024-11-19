@@ -45,5 +45,7 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+    <string>「現在地（位置情報）の取得」を使用する理由や用途を記載</string>
 </dict>
 </plist>
