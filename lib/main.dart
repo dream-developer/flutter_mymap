@@ -17,20 +17,18 @@ void main() {
         urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', // 6
         userAgentPackageName: 'com.example.app', // 7
       ),
-      const MarkerLayer(
-        markers: [         
-          Marker(
-            width: 20.0,
-            height: 20.0,
-            point: LatLng(35.67604049, 139.74527642), // ピンの位置
-            child: Icon( // アイコンを使う例
-              Icons.location_on,
-              color: Colors.red, // ピンの色
-              size: 30, // ピンのサイズ
-            ),
-            rotate: true, // マーカーまで回転しないようにする場合  
-         ),
-        ],
+      CircleLayer(
+        circles: [  
+          CircleMarker(
+            point: const LatLng(35.67604049, 139.74527642),
+            // 「メートル単位」を有効
+            useRadiusInMeter: true,
+            radius: 250, // 半径0.25km(250m)
+            color: Colors.blue.withOpacity(0.1),
+            borderColor: Colors.blue,
+            borderStrokeWidth: 1.0, // 枠線の太さ
+          ),
+        ], 
       ),
       RichAttributionWidget( // 8
         attributions: [
